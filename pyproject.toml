@@ -1,0 +1,16 @@
+[project]
+name = "newsgroups-20-classification"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12.9"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "scikit-learn>=1.5.0",
+    "torch>=2.9.1",
+    "transformers>=4.57.1",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
