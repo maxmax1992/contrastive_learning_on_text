@@ -14,14 +14,16 @@ The comparison is done by:
 
 ## Installation
 Required: `python >= 3.12.9`, `uv`
+run following:
 > `uv sync`
 
 ## Experiments
-Overall 
+Overall approach:  
+Train the contrastive models on the built-in train split, evaluate with baseline (just embedding without Contrastive pre-training)
 
 
 ## Training
-Train the model with
+Train the model with:  
 > `uv run src/train.py`
 This saves the checkpoints under the root such as `./contrastive_model_expoch_x.pt`
 
