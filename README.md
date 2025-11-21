@@ -1,7 +1,8 @@
-# Contrastive fine-tuning of embedding models for better cluster-aware text embedding
+# Contrastive fine-tuning on embedding Transformer models
 
 ## Motivation
 How to get embeddings that fit your use-case and/or demand?
+Sometimes you'd like to use existing class information of the to-be embedded text, which could influence the classification decision on the downstream model (KNN or Logistic regression for example).
 
 This implementation is a Contrastive Learning approach to the classification of the text, where I'm fine-tuning the embedding model. For the sake of the demo data used here is a "The 20 newsgroups text dataset" dataset which comprises of 20 different classses and about 10k+ training examples and about 250 test examples.
 
