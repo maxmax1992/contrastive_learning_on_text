@@ -19,7 +19,7 @@ run following:
 
 ## Experiments
 Overall approach:  
-Train the contrastive models on the built-in train split, evaluate with baseline (just embedding without Contrastive pre-training)
+Train the contrastive models on the built-in train split, evaluate with baseline (just embedding without Contrastive pre-training) eval split, 80% for populating the KNN index, the rest 20% of the test split on final evaluation.
 
 
 ## Training
