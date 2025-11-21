@@ -23,8 +23,10 @@ _CACHE_FILE_TF_IDF = Path(__file__).resolve().parents[1] / ".dataset_cache_tf_id
 _CACHE_FILE_BERT = Path(__file__).resolve().parents[1] / ".dataset_cache_bert"
 
 import random
+from typing import Callable
+
 class SameClassContrastiveDataset(torch.utils.data.Dataset):
-    def __init__(self, texts: list[str], labels: list[int], augmenter: Callable = None
+    def __init__(self, texts: list[str], labels: list[int], augmenter: Callable = None,
                 n_pos_samples: int = 1, n_neg_samples: int = 1):
         self.dataset = texts
         self.labels = labels
@@ -36,22 +38,44 @@ class SameClassContrastiveDataset(torch.utils.data.Dataset):
             self.class_to_samples[label].append(text)
 
     def get_pos_samples(self, pos_label: int) -> list[str]:
-        return random.sample(self.class_to_samples[label], self.n_pos_samples)
+        samples = self.class_to_samples[pos_label]
+        if len(samples) < self.n_pos_samples:
+            return random.choices(samples, k=self.n_pos_samples)
+        return random.sample(samples, self.n_pos_samples)
     
     def get_neg_samples(self, pos_label: int) -> list[str]:
         different_class_ids = [i for i in self.class_ids if i != pos_label]
-        random_neg_classes = random.sample(different_class_ids, self.n_neg_samples)
+        # Pick random classes for negatives
+        random_neg_classes = random.choices(different_class_ids, k=self.n_neg_samples)
         neg_samples = []
         for neg_class in random_neg_classes:
-            neg_samples.append(random.sample(self.class_to_samples[neg_class], 1)[0])
+            samples = self.class_to_samples[neg_class]
+            if not samples: # Should not happen if labels are consistent
+                continue
+            neg_samples.append(random.choice(samples))
         return neg_samples
 
     def __len__(self):
         return len(self.dataset)
     
     def __getitem__(self, idx):
-        x_1 = self.dataset[idx]
-        return x_1, x_2, self.labels[idx]
+        anchor_text = self.dataset[idx]
+        anchor_label = self.labels[idx]
+        
+        # Get positive and negative samples
+        # We take the first one since we typically want 1 pos and 1 neg for simple triplet
+        # If n_pos_samples > 1, the user might expect a list, but for standard contrastive 
+        # (anchor, pos, neg) usually implies singletons. 
+        # Given the user request "treat a positive example as a same class documents", 
+        # I will return single strings if n=1, else list.
+        
+        pos_samples = self.get_pos_samples(anchor_label)
+        neg_samples = self.get_neg_samples(anchor_label)
+        
+        positive_text = pos_samples[0] if self.n_pos_samples == 1 else pos_samples
+        negative_text = neg_samples[0] if self.n_neg_samples == 1 else neg_samples
+        
+        return anchor_text, positive_text, negative_text, anchor_label
 
 def load_20newsgroups(
     subset: str = "train",
@@ -98,7 +122,7 @@ def load_20newsgroups(
 
     return cast(Bunch, dataset)
 
-def extract_tf_idf_vectors(dataset: list[str], force_refresh: bool = False) -> csr_matrix:
+def extract_tf_idf_vectors(dataset: list[str], force_refresh: bool = False):
     if not force_refresh:
         with suppress(OSError, pickle.UnpicklingError):
             cached = pickle.loads(_CACHE_FILE_TF_IDF.read_bytes())
@@ -164,7 +188,7 @@ def format_documents(documents: Bunch, to_lower: bool = False) -> list[tuple[str
 
     formatted: list[tuple[str, str]] = []
     labels: list[int] = []
-    
+
     i = 0
     for document, label in zip(documents.data, documents.target):
         i += 1
@@ -184,7 +208,6 @@ def format_documents(documents: Bunch, to_lower: bool = False) -> list[tuple[str
                 f.write(document)
     print("Number of documents: ", len(formatted), "out of ", len(documents), " skipped % ", (len(documents) - len(formatted)) / len(documents) * 100)
     # formatted = [strip_punctuations(document) for document in formatted]
-    
     return formatted, labels
 
 
@@ -216,5 +239,4 @@ if __name__ == "__main__":
     # vectors_train = extract_tf_idf_vectors(train_x)
     vectors_train = extract_bert_vectors(train_x)
     visualize_dataset_clusters(vectors_train, train_y)
-
     # print(dataset_train.data[0])

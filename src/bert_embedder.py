@@ -39,6 +39,42 @@ class BertEmbedder:
         ).cpu().numpy()
         return sentence_embeddings
 
+class TrainableBertEmbedder(torch.nn.Module):
+    def __init__(
+        self,
+        model_name: str = "answerdotai/ModernBERT-base",
+        max_length: int = 256,
+    ):
+        super().__init__()
+        self.max_length = max_length
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.tokenizer.model_max_length = max_length
+        
+        self.model = AutoModel.from_pretrained(model_name)
+        # We don't call .eval() or .to(device) here immediately if we want to manage it in the training loop,
+        # but usually it's fine to leave it to the caller or do it here. 
+        # However, for nn.Module, .to(device) is usually called by the user on the instance.
+        
+    def forward(self, texts: list[str]) -> torch.Tensor:
+        inputs = self.tokenizer(
+            texts,
+            padding=True,
+            truncation=True,
+            max_length=self.max_length,
+            return_tensors="pt",
+        ).to(self.model.device)
+        
+        outputs = self.model(**inputs)
+        sentence_embeddings = outputs.last_hidden_state[:, 0, :]  # (batch, hidden) → CLS/BOS
+        
+        # Normalize? Usually contrastive loss works better with normalized vectors, 
+        # but sometimes it's part of the loss or projection head. 
+        # The original had normalization. Let's keep it but return tensor.
+        sentence_embeddings = torch.nn.functional.normalize(
+            sentence_embeddings, p=2, dim=-1
+        )
+        return sentence_embeddings
+
 if __name__ == "__main__":
     samples = [
         "The King is the emperor of the kingdom.",
