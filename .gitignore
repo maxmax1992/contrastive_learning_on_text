@@ -13,5 +13,10 @@ wheels/
 .dataset_cache_bert
 invalid_documents/
 
+
+*.env
 *.pt
 *.npz
+*.csv
+*.bak
+*.joblib
