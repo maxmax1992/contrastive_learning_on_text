@@ -1,22 +1,48 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+*.so
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
 
 # Virtual environments
-.venv
-.dataset_cache
-.dataset_cache_tf_idf
-.dataset_cache_bert
-invalid_documents/
+.venv/
+venv/
+ENV/
 
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
+# Environment variables
+.env
 *.env
-*.pt
+
+# Dataset caches
+.dataset_cache
+.dataset_cache_*
+cache/
 *.npz
 *.csv
-*.bak
-*.joblib
+*.pkl
+
+# Model files (large binaries)
+models/*.joblib
+
+# Temporary / invalid data
+invalid_documents/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/

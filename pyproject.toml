@@ -1,20 +1,18 @@
 [project]
 name = "newsgroups-20-classification"
 version = "0.1.0"
-description = "Add your description here"
+description = "Text classification on 20 Newsgroups using OpenAI embeddings with Optuna hyperparameter optimization"
 readme = "README.md"
-requires-python = ">=3.12.9"
+requires-python = ">=3.12"
 dependencies = [
-    "dotenv>=0.9.9",
-    "matplotlib>=3.10.7",
-    "openai>=2.8.1",
-    "optuna>=4.6.0",
-    "pytest>=8.0.0",
-    "pytest-mock>=3.12.0",
+    "matplotlib>=3.10.0",
+    "numpy>=2.0.0",
+    "openai>=1.0.0",
+    "optuna>=4.0.0",
+    "python-dotenv>=1.0.0",
     "scikit-learn>=1.5.0",
-    "seaborn>=0.13.2",
-    "torch>=2.9.1",
-    "transformers>=4.57.1",
+    "tqdm>=4.66.0",
+    "xgboost>=2.0.0",
 ]
 
 [tool.pyright]
